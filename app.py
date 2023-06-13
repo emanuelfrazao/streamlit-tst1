@@ -1,23 +1,23 @@
 import streamlit as st
-
+import seaborn as sns
 import numpy as np
 import pandas as pd
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
 
-st.markdown("""# This is a header
-## This is a sub header
-This is text""")
+model = Sequential(
+    Dense(16, activation='relu', input_shape=(4,)),
+    Dense(8, activation='relu'),
+    Dense(1, activation='sigmoid'),
+)
 
-df = pd.DataFrame({
-    'first column': list(range(1, 11)),
-    'second column': np.arange(10, 101, 10)
-})
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-# this slider allows the user to select a number of lines
-# to display in the dataframe
-# the selected value is returned by st.slider
+model.initialize()
+
+iris = sns.load_dataset('iris')
+
+st.title('Iris EDA')
 line_count = st.slider('Select a line count', 1, 10, 3)
-
-# and used to select the displayed lines
-head_df = df.head(line_count)
-
-head_df
+st.write(f'You selected {line_count} lines.')
+st.dataframe(iris)
