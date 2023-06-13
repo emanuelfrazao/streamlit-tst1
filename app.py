@@ -1,23 +1,21 @@
 import streamlit as st
-import seaborn as sns
-import numpy as np
-import pandas as pd
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 
-model = Sequential(
-    Dense(16, activation='relu', input_shape=(4,)),
-    Dense(8, activation='relu'),
-    Dense(1, activation='sigmoid'),
-)
+@st.cache_resource  # 👈 Add the caching decorator
+def load_model():    
+    tokenizer = AutoTokenizer.from_pretrained("model")
+    classifier = AutoModelForSequenceClassification.from_pretrained("model")
+    return pipeline('zero-shot-classification', model=classifier, tokenizer=tokenizer)
 
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+st.title('Text Classification with BART!')
+pipe = load_model()
 
-model.initialize()
+text = st.text_input('Tell me something about yourself')
 
-iris = sns.load_dataset('iris')
-
-st.title('Iris EDA')
-line_count = st.slider('Select a line count', 1, 10, 3)
-st.write(f'You selected {line_count} lines.')
-st.dataframe(iris)
+st.text(text)
+if text != '':
+    
+    resp = pipe(text,
+            candidate_labels=["sounds sad", "big news", "curious fact"],
+        )
+    st.write(resp)
